@@ -7,10 +7,19 @@ export default class SveltePropSerializable {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			const newObj: any = {};
 			for (const key of keys) {
-				if (typeof obj[key] === 'function') {
+				if (typeof obj[key] === 'function' || key === '__proto__') {
 					continue;
 				} else if (typeof obj[key] === 'object') {
-					newObj[key] = recurse($state.snapshot(obj[key] as Record<string, unknown>));
+					if (Array.isArray(obj[key])) {
+						const array = [];
+						for (const item of $state.snapshot(obj[key])) {
+							if (typeof item === 'object') array.push(recurse($state.snapshot(item)));
+							else array.push($state.snapshot(item));
+						}
+						newObj[key] = array;
+					} else {
+						newObj[key] = recurse($state.snapshot(obj[key] as Record<string, unknown>));
+					}
 				} else {
 					newObj[key] = $state.snapshot(obj[key]);
 				}

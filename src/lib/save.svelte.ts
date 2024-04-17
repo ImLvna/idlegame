@@ -5,21 +5,6 @@ import { Caeser } from './utils';
 
 export const CaesarIndex = 16;
 
-class MoneyLevels {
-	worker = $state(0);
-	manager = $state(0);
-}
-
-class ScienceLevels {
-	worker = $state(0);
-	manager = $state(0);
-}
-
-class Levels {
-	money = new MoneyLevels();
-	science = new ScienceLevels();
-}
-
 export default class Save extends SveltePropSerializable {
 	// The amount of money the player has
 	money = $state(0);
@@ -36,7 +21,16 @@ export default class Save extends SveltePropSerializable {
 	// The ratio of producers making money to science
 	ratioProducers = $state(0);
 	// the levels of the upgrades
-	levels = new Levels();
+	levels = $state({
+		money: {
+			worker: 0,
+			manager: 0
+		},
+		science: {
+			worker: 0,
+			manager: 0
+		}
+	});
 	// the number of rebirths
 	rebirths = $state(0);
 
@@ -122,13 +116,17 @@ export default class Save extends SveltePropSerializable {
 	save() {
 		this.lastLogout = Date.now();
 
-		const serialized = JSON.stringify(this.serialize());
+		const serialized = this.serialize();
+
+		delete serialized.loaded;
+
+		const string = JSON.stringify(serialized);
 		if (this.encrypted) {
-			const encrypted = Caeser(btoa(serialized), CaesarIndex);
+			const encrypted = Caeser(btoa(string), CaesarIndex);
 			window.localStorage.setItem('encSave', encrypted);
 			window.localStorage.removeItem('save');
 		} else {
-			window.localStorage.setItem('save', serialized);
+			window.localStorage.setItem('save', string);
 			window.localStorage.removeItem('encSave');
 		}
 	}
