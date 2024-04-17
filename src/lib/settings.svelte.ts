@@ -1,63 +1,51 @@
-export class SerializableSettings {
-	colorscheme: string;
+import type tw from './theme.svelte';
 
-	constructor(settings: Settings) {
+export class SerializableSettings {
+	colorscheme: keyof typeof tw.theme.colors;
+	exposeSave: boolean;
+
+	constructor(settings: SerializableSettings | Settings) {
 		this.colorscheme = settings.colorscheme;
+		this.exposeSave = settings.exposeSave;
 	}
 }
 
 export default class Settings implements SerializableSettings {
-	colorscheme = $state('gray');
+	// colorscheme is a key in tw.theme.colors
+	colorscheme: keyof typeof tw.theme.colors = $state('gray');
+	// Whether to expose the save to the window
+	exposeSave = $state(false);
 
 	constructor() {}
 
-	static load(): Settings {
+	load() {
 		try {
-			let serializableSave: SerializableSave | null = null;
-			const lsSave = window.localStorage.getItem('save');
-			if (lsSave) {
-				serializableSave = JSON.parse(lsSave);
-			} else {
-				const encryptedLsSave = window.localStorage.getItem('encSave');
-				if (encryptedLsSave) {
-					const decrypted = atob(Caeser(encryptedLsSave, -CaesarIndex));
-					serializableSave = JSON.parse(decrypted);
-				}
-			}
+			const lsSettings = window.localStorage.getItem('settings');
+			if (lsSettings) {
+				const serialized: Partial<SerializableSettings> = JSON.parse(lsSettings);
 
-			if (serializableSave) {
-				const save = new Save();
-				save.money = serializableSave.money;
-				save.science = serializableSave.science;
-				save.encrypted = serializableSave.encrypted;
-				return save;
+				this.colorscheme = serialized.colorscheme ?? this.colorscheme;
+				this.exposeSave = serialized.exposeSave ?? this.exposeSave;
 			} else {
-				throw new Error('No save found');
+				throw new Error('No settings found');
 			}
 		} catch (e) {
-			console.error('Failed to load save');
+			console.error('Failed to load Settings');
 			throw e;
 		}
 	}
 
 	save() {
-		const save = new SerializableSave(this);
+		const save = new SerializableSettings(this);
 		const serialized = JSON.stringify(save);
-		if (this.encrypted) {
-			const encrypted = Caeser(btoa(serialized), CaesarIndex);
-			window.localStorage.setItem('encSave', encrypted);
-			window.localStorage.removeItem('save');
-		} else {
-			window.localStorage.setItem('save', serialized);
-			window.localStorage.removeItem('encSave');
-		}
+
+		window.localStorage.setItem('settings', serialized);
 	}
 
 	registerSaveEffect() {
 		$effect(() => {
-			this.money;
-			this.science;
-			this.encrypted;
+			this.colorscheme;
+			this.exposeSave;
 			this.save();
 		});
 	}
