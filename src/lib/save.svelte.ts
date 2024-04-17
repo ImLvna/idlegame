@@ -1,11 +1,11 @@
 import moment from 'moment';
 import { toastInfo } from './client/toast';
-import SveltePropSerializable from './sveltePropSerializable.svelte';
 import { Caeser } from './utils';
+import LoadableSveltePropSerializable from './classes/loadableSveltePropSerializable';
 
 export const CaesarIndex = 16;
 
-export default class Save extends SveltePropSerializable {
+export default class Save extends LoadableSveltePropSerializable {
 	// The amount of money the player has
 	money = $state(0);
 	// The amount of science the player has
@@ -86,21 +86,7 @@ export default class Save extends SveltePropSerializable {
 			}
 
 			if (serializableSave) {
-				this.money = serializableSave.money ?? this.money;
-				this.science = serializableSave.science ?? this.science;
-				this.encrypted = serializableSave.encrypted ?? this.encrypted;
-				this.lastLogout = serializableSave.lastLogout;
-				this.offlineTime = serializableSave.offlineTime ?? this.offlineTime;
-				this.ratioProducers = serializableSave.ratioProducers ?? this.ratioProducers;
-				this.levels.money.worker =
-					serializableSave.levels?.money?.worker ?? this.levels.money.worker;
-				this.levels.money.manager =
-					serializableSave.levels?.money?.manager ?? this.levels.money.manager;
-				this.levels.science.worker =
-					serializableSave.levels?.science?.worker ?? this.levels.science.worker;
-				this.levels.science.manager =
-					serializableSave.levels?.science?.manager ?? this.levels.science.manager;
-				this.rebirths = serializableSave.rebirths ?? this.rebirths;
+				this.loadSerialized(serializableSave);
 
 				this.finishLoad();
 			} else {

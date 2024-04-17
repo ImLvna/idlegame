@@ -1,31 +1,23 @@
+import LoadableSveltePropSerializable from './classes/loadableSveltePropSerializable';
 import type tw from './theme.svelte';
 
-export class SerializableSettings {
-	colorscheme: keyof typeof tw.theme.colors;
-	exposeSave: boolean;
-
-	constructor(settings: SerializableSettings | Settings) {
-		this.colorscheme = settings.colorscheme;
-		this.exposeSave = settings.exposeSave;
-	}
-}
-
-export default class Settings implements SerializableSettings {
+export default class Settings extends LoadableSveltePropSerializable {
 	// colorscheme is a key in tw.theme.colors
 	colorscheme: keyof typeof tw.theme.colors = $state('gray');
 	// Whether to expose the save to the window
 	exposeSave = $state(false);
 
-	constructor() {}
+	constructor() {
+		super();
+	}
 
 	load() {
 		try {
 			const lsSettings = window.localStorage.getItem('settings');
 			if (lsSettings) {
-				const serialized: Partial<SerializableSettings> = JSON.parse(lsSettings);
+				const serialized: Partial<Settings> = JSON.parse(lsSettings);
 
-				this.colorscheme = serialized.colorscheme ?? this.colorscheme;
-				this.exposeSave = serialized.exposeSave ?? this.exposeSave;
+				this.loadSerialized(serialized);
 			} else {
 				throw new Error('No settings found');
 			}
@@ -36,10 +28,11 @@ export default class Settings implements SerializableSettings {
 	}
 
 	save() {
-		const save = new SerializableSettings(this);
-		const serialized = JSON.stringify(save);
+		const serialized = this.serialize();
 
-		window.localStorage.setItem('settings', serialized);
+		const string = JSON.stringify(serialized);
+
+		window.localStorage.setItem('settings', string);
 	}
 
 	registerSaveEffect() {

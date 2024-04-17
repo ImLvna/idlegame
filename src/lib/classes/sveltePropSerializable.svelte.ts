@@ -1,3 +1,7 @@
+/**
+ * Utility class that allows for easy serialization of Svelte props.
+ * Recurses the object, cloning it and snapshotting all properties.
+ */
 export default class SveltePropSerializable {
 	serialize() {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
