@@ -1,28 +1,26 @@
 import moment from 'moment';
 import { toastInfo } from './client/toast';
+import SveltePropSerializable from './sveltePropSerializable.svelte';
 import { Caeser } from './utils';
 
 export const CaesarIndex = 16;
 
-export class SerializableSave {
-	money: number;
-	science: number;
-	encrypted: boolean = true;
-	lastLogout?: number;
-	offlineTime?: number;
-	ratioProducers: number;
-
-	constructor(save: Save) {
-		this.money = save.money;
-		this.science = save.science;
-		this.encrypted = save.encrypted;
-		this.lastLogout = save.lastLogout;
-		this.offlineTime = save.offlineTime;
-		this.ratioProducers = save.ratioProducers;
-	}
+class MoneyLevels {
+	worker = $state(0);
+	manager = $state(0);
 }
 
-export default class Save implements SerializableSave {
+class ScienceLevels {
+	worker = $state(0);
+	manager = $state(0);
+}
+
+class Levels {
+	money = new MoneyLevels();
+	science = new ScienceLevels();
+}
+
+export default class Save extends SveltePropSerializable {
 	// The amount of money the player has
 	money = $state(0);
 	// The amount of science the player has
@@ -37,8 +35,14 @@ export default class Save implements SerializableSave {
 	offlineTime = $state(0);
 	// The ratio of producers making money to science
 	ratioProducers = $state(0);
+	// the levels of the upgrades
+	levels = new Levels();
+	// the number of rebirths
+	rebirths = $state(0);
 
-	constructor() {}
+	constructor() {
+		super();
+	}
 
 	finishLoad() {
 		if (this.lastLogout) {
@@ -75,7 +79,7 @@ export default class Save implements SerializableSave {
 
 	load() {
 		try {
-			let serializableSave: Partial<SerializableSave> | null = null;
+			let serializableSave: Partial<Save> | null = null;
 			const lsSave = window.localStorage.getItem('save');
 			if (lsSave) {
 				serializableSave = JSON.parse(lsSave);
@@ -93,6 +97,16 @@ export default class Save implements SerializableSave {
 				this.encrypted = serializableSave.encrypted ?? this.encrypted;
 				this.lastLogout = serializableSave.lastLogout;
 				this.offlineTime = serializableSave.offlineTime ?? this.offlineTime;
+				this.ratioProducers = serializableSave.ratioProducers ?? this.ratioProducers;
+				this.levels.money.worker =
+					serializableSave.levels?.money?.worker ?? this.levels.money.worker;
+				this.levels.money.manager =
+					serializableSave.levels?.money?.manager ?? this.levels.money.manager;
+				this.levels.science.worker =
+					serializableSave.levels?.science?.worker ?? this.levels.science.worker;
+				this.levels.science.manager =
+					serializableSave.levels?.science?.manager ?? this.levels.science.manager;
+				this.rebirths = serializableSave.rebirths ?? this.rebirths;
 
 				this.finishLoad();
 			} else {
@@ -108,8 +122,7 @@ export default class Save implements SerializableSave {
 	save() {
 		this.lastLogout = Date.now();
 
-		const save = new SerializableSave(this);
-		const serialized = JSON.stringify(save);
+		const serialized = JSON.stringify(this.serialize());
 		if (this.encrypted) {
 			const encrypted = Caeser(btoa(serialized), CaesarIndex);
 			window.localStorage.setItem('encSave', encrypted);
