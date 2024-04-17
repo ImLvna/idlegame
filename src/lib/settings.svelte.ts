@@ -11,6 +11,10 @@ export default class Settings extends LoadableSveltePropSerializable {
 		super();
 	}
 
+	reset() {
+		this.loadSerialized(new Settings().serialize());
+	}
+
 	load() {
 		try {
 			const lsSettings = window.localStorage.getItem('settings');

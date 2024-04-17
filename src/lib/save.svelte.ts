@@ -38,6 +38,11 @@ export default class Save extends LoadableSveltePropSerializable {
 		super();
 	}
 
+	reset() {
+		this.loadSerialized(new Save().serialize());
+		this.finishLoad();
+	}
+
 	finishLoad() {
 		if (this.lastLogout) {
 			if (this.offlineTime !== 3600000) {

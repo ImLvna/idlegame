@@ -13,6 +13,8 @@
 
 	const settings = getContext<Settings>('settings');
 
+	const numberBlacklist = ['black', 'white', 'inherit', 'current', 'transparent'];
+
 	const className = $derived.by(() => {
 		settings.colorscheme;
 
@@ -28,7 +30,11 @@
 		if (bg) {
 			switch (typeof bg) {
 				case 'number':
-					addToClass(`bg-${settings.colorscheme}-${bg}`);
+					if (numberBlacklist.includes(settings.colorscheme)) {
+						addToClass(`bg-${settings.colorscheme}`);
+					} else {
+						addToClass(`bg-${settings.colorscheme}-${bg}`);
+					}
 					break;
 				case 'string':
 					addToClass(`bg-${bg}`);
@@ -43,6 +49,7 @@
 			switch (typeof text) {
 				case 'number':
 					addToClass(`text-${settings.colorscheme}-${text}`);
+
 					break;
 				case 'string':
 					addToClass(`text-${text}`);

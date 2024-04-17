@@ -94,7 +94,7 @@
 			<ButtonLink link="/">Home</ButtonLink>
 			<ButtonLink link="/settings">Settings</ButtonLink>
 		</div>
-		<Themable bg={600} class="content h-full w-full rounded-tl-xl p-10">
+		<Themable bg={600} class="content h-full w-full rounded-tl-xl p-10 pb-28 overflow-y-scroll">
 			{@render children()}
 		</Themable>
 	</div>
@@ -104,6 +104,7 @@
 	:global(html, body) {
 		width: 100%;
 		height: 100%;
+		overflow: hidden;
 	}
 
 	:global(.toast) {
