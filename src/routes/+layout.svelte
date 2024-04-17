@@ -74,7 +74,7 @@
 
 	<div class="header flex flex-row w-full h-16 justify-between p-2 pr-10">
 		<div class="h-full w-1/2 flex flex-row justify-start gap-4">
-			<h1 class="justify-start items-center content-center text-2xl font-bold">
+			<h1 class="justify-start items-center content-center self-center text-2xl font-bold">
 				Unnamed Idle Game
 			</h1>
 		</div>
