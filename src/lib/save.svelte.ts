@@ -44,18 +44,16 @@ export default class Save extends LoadableSveltePropSerializable {
 	}
 
 	finishLoad() {
-		if (this.lastLogout) {
+		if (this.lastLogout !== undefined) {
 			if (this.offlineTime !== 3600000) {
 				const now = Date.now();
 				// Max offline time is 1 day
 				// Min offline time is 1hr
-				console.log(now - this.lastLogout);
 				const gained = Math.min(now - this.lastLogout, 86400000);
-				if (gained > 1000 * 60 * 60) {
+				if (gained >= 1000 * 60 * 60) {
 					const total = Math.min(this.offlineTime + gained, 86400000);
 
 					const time = moment.duration(gained);
-					console.log(time);
 					// You were offline for <days> days, <hours> hours, and <minutes> minutes
 					let message = 'You were offline for ';
 					if (time.days() > 0) {
@@ -70,6 +68,8 @@ export default class Save extends LoadableSveltePropSerializable {
 					}
 
 					toastInfo(message);
+
+					this.offlineTime = total;
 				}
 			}
 		}

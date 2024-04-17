@@ -15,8 +15,6 @@ export default function toast(message: string, options: Parameters<typeof Toast.
 	options.theme['--toastBackground'] ??= tw.theme.colors[settings!.colorscheme][500];
 	options.theme['--toastBarBackground'] ??= tw.theme.colors.blue[500];
 
-	console.log(options.theme);
-
 	Toast.push(message, options);
 }
 
